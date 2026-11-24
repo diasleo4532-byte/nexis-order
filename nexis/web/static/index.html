@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nexis Order</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div id="app">
+  <aside id="sidebar">
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 64 64" aria-hidden="true">
+        <circle cx="32" cy="32" r="26" fill="none" stroke="url(#g1)" stroke-width="2.5" opacity=".85"/>
+        <circle cx="32" cy="32" r="7" fill="url(#g1)"/>
+        <path d="M32 6v8M32 50v8M6 32h8M50 32h8" stroke="url(#g1)" stroke-width="2.5" stroke-linecap="round" opacity=".7"/>
+        <defs><linearGradient id="g1" x1="0" y1="0" x2="64" y2="64">
+          <stop offset="0" stop-color="#7fd7c4"/><stop offset="1" stop-color="#6aa8ff"/>
+        </linearGradient></defs>
+      </svg>
+      <div>
+        <div class="brand-name">Nexis</div>
+        <div class="brand-sub">Order · local agent</div>
+      </div>
+    </div>
+
+    <button id="newChatBtn" class="ghost wide">＋ New conversation</button>
+
+    <div class="panel">
+      <div class="panel-title">Hands-free</div>
+      <label class="switch-row">
+        <span>Wake word</span>
+        <span class="switch"><input type="checkbox" id="handsfreeToggle"><i></i></span>
+      </label>
+      <p class="hint">Say <b>“Nexis, …”</b> to talk without touching the keyboard. Audio is transcribed locally and never stored.</p>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Status</div>
+      <div class="status-row"><span class="dot" id="wakeDot"></span><span id="wakeStatus">Voice idle</span></div>
+      <div class="status-row subtle"><span>Model</span><span id="modelSmall">—</span></div>
+      <div class="status-row subtle"><span>Engine</span><span id="engineSmall">—</span></div>
+    </div>
+
+    <div class="sidebar-footer">
+      <button id="settingsBtn" class="ghost wide">Settings</button>
+      <div class="version" id="versionLabel">Nexis</div>
+    </div>
+  </aside>
+
+  <main id="main">
+    <header>
+      <div class="header-left">
+        <h1>Nexis</h1>
+        <span id="modelBadge" class="badge">…</span>
+        <span id="ollamaBadge" class="badge warn" hidden>Ollama offline</span>
+      </div>
+      <div class="header-right">
+        <button id="stopBtn" class="stop" hidden>■ Stop</button>
+      </div>
+    </header>
+
+    <section id="chat" aria-live="polite">
+      <div id="welcome" class="welcome">
+        <div class="welcome-mark">
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <circle cx="32" cy="32" r="26" fill="none" stroke="url(#g2)" stroke-width="2" opacity=".8"/>
+            <circle cx="32" cy="32" r="6" fill="url(#g2)"/>
+            <defs><linearGradient id="g2" x1="0" y1="0" x2="64" y2="64">
+              <stop offset="0" stop-color="#7fd7c4"/><stop offset="1" stop-color="#6aa8ff"/>
+            </linearGradient></defs>
+          </svg>
+        </div>
+        <h2>I listen, I think, I act.</h2>
+        <p>Speak with the mic, or type below. Say <b>“Nexis, …”</b> hands-free once enabled.</p>
+        <div class="chips">
+          <button class="chip" data-say="What can you do?">What can you do?</button>
+          <button class="chip" data-say="List the files in my workspace">Check my workspace</button>
+          <button class="chip" data-say="Search the web for today's technology news and summarize it">Search the news</button>
+          <button class="chip" data-say="Remember that I prefer concise answers">Save a preference</button>
+        </div>
+      </div>
+    </section>
+
+    <div id="wakeBar" hidden>
+      <span class="pulse"></span><span id="wakeBarText">Listening for “Nexis”…</span>
+    </div>
+
+    <div id="composer">
+      <button id="micBtn" class="mic" title="Push to talk (F2)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3Z" fill="currentColor"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3M8.5 21h7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+      <textarea id="input" rows="1" placeholder="Ask Nexis anything…"></textarea>
+      <button id="sendBtn" class="send" title="Send">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12l16-7-5.5 16-3-6.5L4 12Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+    <div class="composer-hint">Enter to send · Shift+Enter for a new line · F2 to talk</div>
+  </main>
+</div>
+
+<div id="settingsModal" class="modal" hidden>
+  <div class="modal-card">
+    <h2>Settings</h2>
+    <div class="field">
+      <label for="modelSelect">Model</label>
+      <select id="modelSelect"></select>
+      <p class="hint">Any tool-calling model pulled in Ollama. Changes apply immediately.</p>
+    </div>
+    <div class="field">
+      <label class="switch-row"><span>Speak replies aloud</span>
+        <span class="switch"><input type="checkbox" id="ttsToggle"><i></i></span>
+      </label>
+    </div>
+    <div class="field">
+      <label class="switch-row"><span>Hands-free wake word</span>
+        <span class="switch"><input type="checkbox" id="handsfreeToggle2"><i></i></span>
+      </label>
+    </div>
+    <div class="field">
+      <label>Workspace</label>
+      <div class="row">
+        <code id="workspacePath">—</code>
+        <button id="openWorkspaceBtn" class="ghost">Open folder</button>
+      </div>
+      <p class="hint">All file actions stay inside this folder.</p>
+    </div>
+    <div class="modal-actions">
+      <button id="closeSettingsBtn" class="primary">Done</button>
+    </div>
+  </div>
+</div>
+
+<div id="confirmModal" class="modal" hidden>
+  <div class="modal-card confirm">
+    <div class="confirm-tag">Confirmation required</div>
+    <h2 id="confirmTitle">—</h2>
+    <pre id="confirmDetails"></pre>
+    <p class="hint">Nexis will only proceed if you approve. Denying tells it to stop.</p>
+    <div class="modal-actions">
+      <button id="denyBtn" class="ghost">Deny</button>
+      <button id="approveBtn" class="primary">Approve</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" hidden></div>
+<script src="/static/app.js"></script>
+</body>
+</html>
